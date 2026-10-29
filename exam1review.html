@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full w-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>604上學期段一國複習</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+        }
+        .tab-active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+            font-weight: 700;
+        }
+        .tab-inactive {
+            color: #6b7280;
+            font-weight: 600;
+        }
+        .tab-inactive:hover {
+            color: #3b82f6;
+        }
+        .radio-custom:checked + div {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        /* 隱藏原生捲軸但保留功能 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+    </style>
+</head>
+<!-- 使用 h-full 與 overflow-hidden 鎖住整個視窗，改由內部 div 產生捲軸，確保絕對定位按鈕永遠浮動於可見視窗右下角 -->
+<body class="h-full w-full bg-[#f3f4f6] overflow-hidden m-0 p-0 relative">
+
+    <!-- 主要滾動視窗區域 -->
+    <div id="main-scroll" class="h-full w-full overflow-y-auto p-4 sm:p-8 scroll-smooth pb-24">
+        <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+            <!-- 標題區塊 -->
+            <div class="bg-blue-600 p-6 text-center">
+                <h1 id="main-title" class="text-3xl font-extrabold text-white tracking-wide">604上學期段一國複習</h1>
+                <p class="text-blue-100 mt-2">請完成測驗並送出答案，系統將會進行自動配分與檢討</p>
+            </div>
+
+            <!-- 頁籤區塊 -->
+            <div class="flex border-b border-gray-200 bg-gray-50 px-2 sm:px-6 pt-4 overflow-x-auto">
+                <button id="btn-tab1" class="tab-active px-4 sm:px-6 py-3 focus:outline-none text-base sm:text-lg transition-colors whitespace-nowrap" onclick="switchTab(1)">
+                    第一～三課 測驗 (20題)
+                </button>
+                <button id="btn-tab2" class="tab-inactive px-4 sm:px-6 py-3 focus:outline-none text-base sm:text-lg transition-colors whitespace-nowrap" onclick="switchTab(2)">
+                    第四～六課與複習 (20題)
+                </button>
+            </div>
+
+            <!-- 測驗內容區塊 -->
+            <div class="p-4 sm:p-8">
+                
+                <!-- 網頁一：第一到第三課 -->
+                <div id="quiz1-section">
+                    <div id="quiz1-score-container" class="hidden mb-8 p-6 rounded-xl border-2 border-blue-200 bg-blue-50 text-center shadow-inner"></div>
+                    
+                    <form id="quiz1-form">
+                        <div id="quiz1-questions" class="space-y-6"></div>
+                        <div class="mt-10 text-center space-x-4">
+                            <button type="submit" id="quiz1-submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-full shadow-md transition-transform transform hover:scale-105 text-lg">
+                                送出答案
+                            </button>
+                            <button type="button" id="quiz1-retry-btn" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-10 rounded-full shadow-md transition-transform transform hover:scale-105 text-lg" onclick="initQuiz1()">
+                                重新測驗 (更換題目順序)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- 網頁二：第四課到複習 -->
+                <div id="quiz2-section" class="hidden">
+                    <div id="quiz2-score-container" class="hidden mb-8 p-6 rounded-xl border-2 border-blue-200 bg-blue-50 text-center shadow-inner"></div>
+                    
+                    <form id="quiz2-form">
+                        <div id="quiz2-questions" class="space-y-6"></div>
+                        <div class="mt-10 text-center space-x-4">
+                            <button type="submit" id="quiz2-submit-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-10 rounded-full shadow-md transition-transform transform hover:scale-105 text-lg">
+                                送出答案
+                            </button>
+                            <button type="button" id="quiz2-retry-btn" class="hidden bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-10 rounded-full shadow-md transition-transform transform hover:scale-105 text-lg" onclick="initQuiz2()">
+                                重新測驗 (更換題目順序)
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- 絕對定位至頂與至底按鈕 (附著在最外層，不受 iframe 滾動限制) -->
+    <div class="absolute bottom-6 right-6 flex flex-col gap-3 z-[9999] pointer-events-none">
+        <button type="button" onclick="document.getElementById('main-scroll').scrollTo({top: 0, behavior: 'smooth'})" class="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110 focus:outline-none opacity-90 hover:opacity-100" title="至頂">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+        </button>
+        <button type="button" onclick="const scrollDiv = document.getElementById('main-scroll'); scrollDiv.scrollTo({top: scrollDiv.scrollHeight, behavior: 'smooth'})" class="pointer-events-auto bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-transform transform hover:scale-110 focus:outline-none opacity-90 hover:opacity-100" title="至底">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+        </button>
+    </div>
+
+    <script>
+        // 原始題庫 1 (第一至三課) - 20題
+        const rawQuiz1Data = [
+            {
+                question: "「弄清楚」的「弄」字義為何？",
+                correctAnswer: "探究、追查",
+                options: ["探究、追查", "把玩、賞玩", "欺騙", "做"],
+                explanation: "「弄清楚」的「弄」是探究、追查的意思。"
+            },
+            {
+                question: "「班門弄斧」的「弄」字義為何？",
+                correctAnswer: "把玩、賞玩",
+                options: ["把玩、賞玩", "探究、追查", "欺騙", "做"],
+                explanation: "「班門弄斧」的「弄」是把玩、賞玩的意思。"
+            },
+            {
+                question: "「愚弄他人」的「弄」字義為何？",
+                correctAnswer: "欺騙",
+                options: ["欺騙", "把玩、賞玩", "探究、追查", "做"],
+                explanation: "「愚弄他人」的「弄」是欺騙的意思。"
+            },
+            {
+                question: "判斷下列句子的情境是否合理：「弟弟張開嘴巴，不敢發出聲音。」",
+                correctAnswer: "不合理，應改為「閉上」",
+                options: ["合理", "不合理，應改為「閉上」", "不合理，應改為「微笑」", "不合理，應改為「大叫」"],
+                explanation: "不敢發出聲音，嘴巴應該是「閉上」才合理。"
+            },
+            {
+                question: "判斷下列句子的情境是否合理：「太陽被一大片烏雲遮住了，天色變得明亮起來。」",
+                correctAnswer: "不合理，應改為「陰暗」",
+                options: ["合理", "不合理，應改為「陰暗」", "不合理，應改為「晴朗」", "不合理，應改為「溫暖」"],
+                explanation: "太陽被烏雲遮住，天色應為「陰暗」。"
+            },
+            {
+                question: "「做事總愛拖拖拉拉的阿華」，適合用哪句名言佳句當座右銘？",
+                correctAnswer: "一個今天勝過兩個明天。",
+                options: ["一個今天勝過兩個明天。", "理想的書籍，是智慧的鑰匙。", "贈人玫瑰，手有餘香。", "聆聽是最高貴的禮貌。"],
+                explanation: "拖拖拉拉需要把握時間，故選「一個今天勝過兩個明天」。"
+            },
+            {
+                question: "「愛看書的新麗」，適合用哪句名言佳句當座右銘？",
+                correctAnswer: "理想的書籍，是智慧的鑰匙。",
+                options: ["理想的書籍，是智慧的鑰匙。", "一個今天勝過兩個明天。", "贈人玫瑰，手有餘香。", "聆聽是最高貴的禮貌。"],
+                explanation: "與看書相關，故選「理想的書籍，是智慧的鑰匙」。"
+            },
+            {
+                question: "「喜歡幫助他人的美玲」，適合用哪句名言佳句當座右銘？",
+                correctAnswer: "贈人玫瑰，手有餘香。",
+                options: ["贈人玫瑰，手有餘香。", "理想的書籍，是智慧的鑰匙。", "一個今天勝過兩個明天。", "聆聽是最高貴的禮貌。"],
+                explanation: "幫助他人自己也能獲得快樂，故選「贈人玫瑰，手有餘香」。"
+            },
+            {
+                question: "「總愛插嘴的祈安」，適合用哪句名言佳句當座右銘？",
+                correctAnswer: "聆聽是最高貴的禮貌。",
+                options: ["聆聽是最高貴的禮貌。", "贈人玫瑰，手有餘香。", "理想的書籍，是智慧的鑰匙。", "一個今天勝過兩個明天。"],
+                explanation: "愛插嘴需要學習傾聽，故選「聆聽是最高貴的禮貌」。"
+            },
+            {
+                question: "爺爺【 】的望著乾涸的稻田，口中不停念道：再不下雨就沒收成了。",
+                correctAnswer: "憂愁",
+                options: ["憂愁", "感慨", "愉悅", "羞愧"],
+                explanation: "乾涸的稻田會讓人感到擔心與「憂愁」。"
+            },
+            {
+                question: "回到兒時生活的地方卻只剩下老舊的房舍，令她【 】萬分。",
+                correctAnswer: "感慨",
+                options: ["感慨", "憂愁", "愉悅", "後悔"],
+                explanation: "觸景生情，產生許多「感慨」。"
+            },
+            {
+                question: "姐姐和我是一起出生的「______」，她在學業上表現得出類拔萃。",
+                correctAnswer: "雙胞胎",
+                options: ["雙胞胎", "孤零零", "固執", "冷落"],
+                explanation: "一起出生的人稱為「雙胞胎」。"
+            },
+            {
+                question: "堅持己見、不肯變通的性格，我們可以用「______」來形容。",
+                correctAnswer: "固執",
+                options: ["固執", "擔憂", "盼望", "雙胞胎"],
+                explanation: "堅持己見不變通即是「固執」。"
+            },
+            {
+                question: "「兩千多年前，孔子在『杏』樹下授徒講學」，句中的錯字應改為何字？",
+                correctAnswer: "壇",
+                options: ["壇", "李", "桃", "梅"],
+                explanation: "應為杏「壇」，指教育界。"
+            },
+            {
+                question: "哪一組字的讀音相同？",
+                correctAnswer: "述 / 術",
+                options: ["述 / 術", "警 / 驚", "惕 / 踢", "矣 / 唉"],
+                explanation: "述(ㄕㄨˋ) / 術(ㄕㄨˋ) 讀音相同。"
+            },
+            {
+                question: "「金字塔是古埃及人□□的結晶。」□填入哪個詞最適合？",
+                correctAnswer: "智慧",
+                options: ["智慧", "智力", "賢慧", "鬥智"],
+                explanation: "金字塔是「智慧」的結晶。"
+            },
+            {
+                question: "「她以這次的失敗經驗為□□，終於締造佳績。」□填入哪個詞最適合？",
+                correctAnswer: "借鏡",
+                options: ["借鏡", "借位", "借調", "租借"],
+                explanation: "把經驗當作參考學習的對象稱為「借鏡」。"
+            },
+            {
+                question: "晚琪在李爺爺家發現牆上掛著一塊匾額，上面寫著「杏壇芬芳」，李爺爺應該曾經在哪裡服務？",
+                correctAnswer: "教育界",
+                options: ["教育界", "醫界", "銀行", "農漁業"],
+                explanation: "「杏壇」代指「教育界」。"
+            },
+            {
+                question: "「不論地位高低，只要人們有心學習，孔子都願意教導。」哪一個語詞用來形容孔子這種教學精神？",
+                correctAnswer: "有教無類",
+                options: ["有教無類", "溫故知新", "見利忘義", "因材施教"],
+                explanation: "施教的對象沒有貴賤智愚的分別，即「有教無類」。"
+            },
+            {
+                question: "「溫故而知新，可以為『師』矣。」的「師」解釋為？",
+                correctAnswer: "有一技之長可以教導別人的人",
+                options: ["有一技之長可以教導別人的人", "學校裡的老師", "軍隊的長官", "專業的技工"],
+                explanation: "這裡的師指「有一技之長可以教導別人的人」。"
+            }
+        ];
+
+        // 原始題庫 2 (第四至六課與複習) - 20題
+        const rawQuiz2Data = [
+            {
+                question: "下面各組「 」中讀音相同的是？",
+                correctAnswer: "血「液」/「夜」晚",
+                options: ["血「液」/「夜」晚", "「組」織 / 「阻」止", "「翹」起尾巴 / 「翹」首盼望", "依「據」 / 電「鋸」"],
+                explanation: "液(ㄧㄝˋ) / 夜(ㄧㄝˋ) 讀音相同。"
+            },
+            {
+                question: "「這座森林裡有許多被非法□斷的樹木，真令人感到痛心！」□應填入哪個字？",
+                correctAnswer: "鋸",
+                options: ["鋸", "划", "滑", "組"],
+                explanation: "應填入「鋸」斷。"
+            },
+            {
+                question: "下列哪個句子的敘述矛盾、不合理？",
+                correctAnswer: "國仲是知名的演員，大家都不認識他。",
+                options: ["國仲是知名的演員，大家都不認識他。", "爸爸因為久坐又不運動，造成身體的不適感。", "圓滾滾的露珠在葉子上滾動。", "弟弟的房間整理過後，看起來清潔溜溜。"],
+                explanation: "既然是「知名」的演員，就不會「大家都不認識」，敘述矛盾。"
+            },
+            {
+                question: "下面哪一個語詞不是長度單位？",
+                correctAnswer: "毫升",
+                options: ["毫升", "奈米", "毫米", "公里"],
+                explanation: "「毫升」是容量單位，不是長度單位。"
+            },
+            {
+                question: "「A380空中巴士是巨無霸客機」中「巨無霸」的意思是？",
+                correctAnswer: "形容體積高大的人或物",
+                options: ["形容體積高大的人或物", "特別有名的", "形容社會經驗非常豐富", "比喻傑出的人物"],
+                explanation: "巨無霸形容體積非常巨大。"
+            },
+            {
+                question: "「能在這次比賽中獲得第一名，是妹妹做夢都沒想過的事。」適合形容句中的情境是？",
+                correctAnswer: "始料未及",
+                options: ["始料未及", "不出所料", "意料之中", "理所當然"],
+                explanation: "做夢都沒想過，表示一開始完全沒料到，即「始料未及」。"
+            },
+            {
+                question: "哪一個「 」中的語詞不是表示時間短暫？",
+                correctAnswer: "他思考「良久」才說出答案",
+                options: ["他思考「良久」才說出答案", "「霎時」，大家都安靜了", "「眨眼間」，小鳥不見了", "「一剎那」劃過天際"],
+                explanation: "「良久」表示時間經過很久，並非短暫。"
+            },
+            {
+                question: "「踏實」是指切實認真。哪個句子適合填入這個語詞？",
+                correctAnswer: "阿真工作踏實，獲得公司重用",
+                options: ["阿真工作踏實，獲得公司重用", "天氣晴朗，我們到郊外踏實", "請不要踏實草地", "隊伍在原地踏實準備進場"],
+                explanation: "形容工作態度切實認真，應填入「阿真工作踏實」。"
+            },
+            {
+                question: "「她□□□我的媽媽，□□我心目中無所不能的女超人。」□應填入？",
+                correctAnswer: "不只是／而且是",
+                options: ["不只是／而且是", "或許是／總是", "雖然是／可是", "如果是／應該"],
+                explanation: "表層遞關係，應填入「不只是／而且是」。"
+            },
+            {
+                question: "依據《樹的聯想》課文內容，敘述正確的是？",
+                correctAnswer: "作者因為平時趕著上班，所以從前沒有注意到施工路段的那棵樹木。",
+                options: ["作者因為平時趕著上班，所以從前沒有注意到施工路段的那棵樹木。", "作者認為樹木如花朵一般，只有短暫的美感。", "作者將所有朋友形容成樹木。", "泥濘不堪的馬路讓人覺得很舒適。"],
+                explanation: "作者平時匆忙趕路，因而忽略了那棵樹的存在。"
+            },
+            {
+                question: "下面哪一個「競」的用法錯誤？",
+                correctAnswer: "畢競",
+                options: ["畢競", "競賽", "競爭", "競選"],
+                explanation: "應為「畢竟」，表示到底、終究。"
+            },
+            {
+                question: "「哄堂大笑」是指？",
+                correctAnswer: "眾人同時大笑",
+                options: ["眾人同時大笑", "勉強裝出高興的樣子", "比喻轉悲為喜", "歡樂的相聚在一起"],
+                explanation: "「哄堂大笑」形容眾人同時大笑的樣子。"
+            },
+            {
+                question: "「魅力」是指吸引人的力量。下面哪個句子的□中適合填入這個語詞？",
+                correctAnswer: "這座臨海小鎮雖然不大，卻有它獨特的魅力",
+                options: ["這座臨海小鎮雖然不大，卻有它獨特的魅力", "我們魅力的搖旗吶喊", "我用盡魅力，仍然無法移動桌子", "他是董事長的魅力助手，十分受到重用"],
+                explanation: "小鎮有吸引人的力量，故填入「魅力」。"
+            },
+            {
+                question: "會議上，小強的肚子突然咕嚕叫，大家忍不住笑了起來。小強做出什麼反應會給人正面的印象？",
+                correctAnswer: "笑笑的說：原來我還餓著鬧鐘啊",
+                options: ["笑笑的說：原來我還餓著鬧鐘啊", "一聲不吭的離開會議室", "生氣的阻止大家不要笑", "瞪眼看大家"],
+                explanation: "用幽默的方式化解尷尬（展現自嘲）。"
+            },
+            {
+                question: "詞語替換後，句意會改變的是？",
+                correctAnswer: "老師正在(批評/讚美)同學。",
+                options: ["老師正在(批評/讚美)同學。", "倘若/(假如)每個人懂得尊重彼此，社會就能變得和諧。", "即使身處(窘境/困境)，他依然能樂觀積極的面對生活。", "請別再(調侃/揶揄)我了！"],
+                explanation: "批評與讚美是完全相反的意思，替換後句意會改變。"
+            },
+            {
+                question: "哪一個字的部首和其他三個不同？",
+                correctAnswer: "賀",
+                options: ["賀", "惹", "憂", "憤"],
+                explanation: "「惹」、「憂」、「憤」皆為心部，「賀」為貝部。"
+            },
+            {
+                question: "他突如其來的滑稽演出，惹得全場觀眾□□□□。",
+                correctAnswer: "哄堂大笑",
+                options: ["哄堂大笑", "從容不迫", "溫故知新", "適可而止"],
+                explanation: "滑稽演出會讓全場同時大笑，故填入「哄堂大笑」。"
+            },
+            {
+                question: "當雙方各持己見、相持不下，局面沒有進展，這種情況可以用哪一個語詞來形容？",
+                correctAnswer: "僵持",
+                options: ["僵持", "僵冷", "僵硬", "凍僵"],
+                explanation: "相持不下、無進展的局面稱為「僵持」。"
+            },
+            {
+                question: "下面哪一個「 」中的語詞使用錯誤？",
+                correctAnswer: "謠言已經四處「擴張」，他們趕緊出面澄清",
+                options: ["謠言已經四處「擴張」，他們趕緊出面澄清", "睡夢中，我依稀聽見風的聲音", "她喜歡閱讀科學雜誌，探索宇宙的奧妙", "對於網路資訊，我們要保持警惕"],
+                explanation: "謠言應該是四處「擴散」，而非擴張。"
+            },
+            {
+                question: "《樹的聯想》一課中，作者認為種樹的人始料未及的事是什麼？",
+                correctAnswer: "無意間帶給別人快樂",
+                options: ["無意間帶給別人快樂", "當成市區的行道樹", "要經過多年才能長成", "沒有人會去注意"],
+                explanation: "種樹者可能沒想到這棵樹能為路人帶來心靈的撫慰與快樂。"
+            }
+        ];
+
+        // 打亂陣列的函數 (Fisher-Yates Shuffle)
+        function shuffleArray(array) {
+            let currentIndex = array.length, randomIndex;
+            while (currentIndex !== 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [array[currentIndex], array[randomIndex]] = [
+                    array[randomIndex], array[currentIndex]];
+            }
+            return array;
+        }
+
+        let currentQuiz1Data = [];
+        let currentQuiz2Data = [];
+
+        // 初始化與渲染測驗 1
+        function initQuiz1() {
+            // 每次重新測驗強制設定標題
+            document.getElementById('main-title').textContent = '604上學期段一國複習';
+            document.title = '604上學期段一國複習';
+
+            // 深拷貝並打亂題目與選項
+            currentQuiz1Data = shuffleArray(JSON.parse(JSON.stringify(rawQuiz1Data))).map(q => {
+                q.options = shuffleArray(q.options);
+                return q;
+            });
+            renderQuestions(currentQuiz1Data, 'quiz1-questions', 'q1');
+            
+            // 重置 UI
+            document.getElementById('quiz1-score-container').classList.add('hidden');
+            document.getElementById('quiz1-submit-btn').classList.remove('hidden');
+            document.getElementById('quiz1-retry-btn').classList.add('hidden');
+            document.getElementById('quiz1-form').reset();
+        }
+
+        // 初始化與渲染測驗 2
+        function initQuiz2() {
+            // 每次重新測驗強制設定標題
+            document.getElementById('main-title').textContent = '604上學期段一國複習';
+            document.title = '604上學期段一國複習';
+
+            // 深拷貝並打亂題目與選項
+            currentQuiz2Data = shuffleArray(JSON.parse(JSON.stringify(rawQuiz2Data))).map(q => {
+                q.options = shuffleArray(q.options);
+                return q;
+            });
+            renderQuestions(currentQuiz2Data, 'quiz2-questions', 'q2');
+            
+            // 重置 UI
+            document.getElementById('quiz2-score-container').classList.add('hidden');
+            document.getElementById('quiz2-submit-btn').classList.remove('hidden');
+            document.getElementById('quiz2-retry-btn').classList.add('hidden');
+            document.getElementById('quiz2-form').reset();
+        }
+
+        // 切換頁籤邏輯
+        function switchTab(tabIndex) {
+            const btn1 = document.getElementById('btn-tab1');
+            const btn2 = document.getElementById('btn-tab2');
+            const section1 = document.getElementById('quiz1-section');
+            const section2 = document.getElementById('quiz2-section');
+
+            if (tabIndex === 1) {
+                btn1.className = "tab-active px-4 sm:px-6 py-3 focus:outline-none text-base sm:text-lg transition-colors whitespace-nowrap";
+                btn2.className = "tab-inactive px-4 sm:px-6 py-3 focus:outline-none text-base sm:text-lg transition-colors whitespace-nowrap";
+                section1.classList.remove('hidden');
+                section2.classList.add('hidden');
+            } else {
+                btn2.className = "tab-active px-4 sm:px-6 py-3 focus:outline-none text-base sm:text-lg transition-colors whitespace-nowrap";
+                btn1.className = "tab-inactive px-4 sm:px-6 py-3 focus:outline-none text-base sm:text-lg transition-colors whitespace-nowrap";
+                section2.classList.remove('hidden');
+                section1.classList.add('hidden');
+            }
+        }
+
+        // 動態渲染題目
+        function renderQuestions(data, containerId, prefix) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            data.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'bg-white p-5 sm:p-6 rounded-lg border border-gray-200 shadow-sm transition-all duration-300';
+                questionDiv.id = `${prefix}_question_div_${index}`;
+
+                // 題幹
+                const title = document.createElement('h3');
+                title.className = 'text-lg font-bold text-gray-800 mb-4 leading-relaxed';
+                title.textContent = `${index + 1}. ${q.question}`;
+                questionDiv.appendChild(title);
+
+                // 選項區塊
+                const optionsDiv = document.createElement('div');
+                optionsDiv.className = 'grid grid-cols-1 sm:grid-cols-2 gap-3';
+
+                q.options.forEach((opt, optIndex) => {
+                    const label = document.createElement('label');
+                    label.className = 'relative flex items-center cursor-pointer';
+
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = `${prefix}_q${index}`;
+                    radio.value = opt; // 綁定文字內容作為答案，方便打亂後比對
+                    radio.required = true;
+                    radio.className = 'radio-custom absolute opacity-0 w-0 h-0';
+
+                    const customDiv = document.createElement('div');
+                    customDiv.className = 'w-full p-4 border border-gray-300 rounded-lg text-gray-700 hover:bg-blue-50 transition-colors font-medium text-base';
+                    customDiv.textContent = opt;
+
+                    label.appendChild(radio);
+                    label.appendChild(customDiv);
+                    optionsDiv.appendChild(label);
+                });
+                questionDiv.appendChild(optionsDiv);
+
+                // 檢討區 (預設隱藏)
+                const reviewDiv = document.createElement('div');
+                reviewDiv.id = `${prefix}_review${index}`;
+                reviewDiv.className = 'hidden mt-4 pt-4 border-t border-gray-200';
+                questionDiv.appendChild(reviewDiv);
+
+                container.appendChild(questionDiv);
+            });
+        }
+
+        // 計算分數與顯示檢討 (並將錯題移至最前)
+        function handleQuizSubmit(e, data, formId, prefix, scoreContainerId, submitBtnId, retryBtnId) {
+            e.preventDefault();
+            const form = document.getElementById(formId);
+            let correctCount = 0;
+            const totalCount = data.length;
+            const eachScore = 100 / totalCount;
+
+            const containerId = formId.replace('-form', '-questions');
+            const container = document.getElementById(containerId);
+            const questionNodes = Array.from(container.children);
+            const wrongNodes = [];
+            const correctNodes = [];
+
+            data.forEach((q, index) => {
+                const selectedRadio = form.querySelector(`input[name="${prefix}_q${index}"]:checked`);
+                const reviewDiv = document.getElementById(`${prefix}_review${index}`);
+                reviewDiv.classList.remove('hidden');
+
+                const isCorrect = selectedRadio && selectedRadio.value === q.correctAnswer;
+                
+                // 找出所有選項，標示顏色並禁用
+                const radios = form.querySelectorAll(`input[name="${prefix}_q${index}"]`);
+                radios.forEach(r => {
+                    r.disabled = true; 
+                    if (r.value === q.correctAnswer) {
+                        // 正確答案用綠色標示
+                        r.nextElementSibling.classList.add('ring-2', 'ring-green-500', 'border-green-500', 'bg-green-50', 'text-green-800', 'font-bold');
+                    }
+                });
+
+                if (isCorrect) {
+                    correctCount++;
+                    reviewDiv.innerHTML = `
+                        <div class="text-gray-700 font-semibold tracking-wide text-base">
+                            詳解：${q.explanation}
+                        </div>
+                    `;
+                    correctNodes.push(questionNodes[index]);
+                } else {
+                    if (selectedRadio) {
+                        // 學生選錯的答案用紅色標示
+                        selectedRadio.nextElementSibling.classList.add('ring-2', 'ring-red-500', 'border-red-500', 'bg-red-50', 'text-red-800', 'font-bold');
+                    }
+                    reviewDiv.innerHTML = `
+                        <div class="text-gray-700 font-semibold tracking-wide text-base">
+                            詳解：${q.explanation}
+                        </div>
+                    `;
+                    // 錯題加上明顯的紅色邊框，方便視覺辨識
+                    questionNodes[index].classList.remove('border-gray-200');
+                    questionNodes[index].classList.add('border-red-300', 'bg-red-50/30');
+                    wrongNodes.push(questionNodes[index]);
+                }
+            });
+
+            // 將錯題集中移到最前面
+            container.innerHTML = '';
+            wrongNodes.forEach(node => container.appendChild(node));
+            correctNodes.forEach(node => container.appendChild(node));
+
+            // 隱藏送出按鈕，顯示重新測驗按鈕
+            document.getElementById(submitBtnId).classList.add('hidden');
+            document.getElementById(retryBtnId).classList.remove('hidden');
+
+            // 計算分數與呈現
+            const score = Math.round(correctCount * eachScore);
+            const scoreContainer = document.getElementById(scoreContainerId);
+            scoreContainer.classList.remove('hidden');
+            
+            let scoreColor = score >= 80 ? 'text-green-600' : (score >= 60 ? 'text-blue-600' : 'text-red-600');
+            
+            scoreContainer.innerHTML = `
+                <h2 class="text-4xl font-extrabold ${scoreColor} mb-3">本次測驗成績：${score} 分</h2>
+                <p class="text-lg text-gray-700 font-medium">共 ${totalCount} 題，您答對了 <span class="text-green-600 font-bold text-xl">${correctCount}</span> 題</p>
+                <div class="mt-4 inline-block bg-yellow-100 text-yellow-800 px-4 py-2 rounded-full text-sm font-bold shadow-sm border border-yellow-200">
+                    ⭐ 錯題已為您移至最前方，請往下查看正確解答與詳解
+                </div>
+            `;
+            
+            // 平滑滾動到成績處
+            document.getElementById('main-scroll').scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+
+        // 綁定表單送出事件
+        document.getElementById('quiz1-form').addEventListener('submit', function(e) {
+            handleQuizSubmit(e, currentQuiz1Data, 'quiz1-form', 'q1', 'quiz1-score-container', 'quiz1-submit-btn', 'quiz1-retry-btn');
+        });
+
+        document.getElementById('quiz2-form').addEventListener('submit', function(e) {
+            handleQuizSubmit(e, currentQuiz2Data, 'quiz2-form', 'q2', 'quiz2-score-container', 'quiz2-submit-btn', 'quiz2-retry-btn');
+        });
+
+        // 初始化頁面
+        window.onload = function() {
+            initQuiz1();
+            initQuiz2();
+        };
+
+    </script>
+</body>
+</html>
